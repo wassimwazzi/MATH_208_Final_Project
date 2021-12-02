@@ -1,0 +1,276 @@
+---
+title: "Final Project"
+author: "Wassim Wazzi"
+date: "01/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r init, results='hide', echo=FALSE,message=FALSE, warning=FALSE}
+
+library(tidyverse)
+library(ggplot2)
+library(kableExtra)
+library(grid)
+library(gridExtra)
+library(knitr)
+hp_data=read_csv(("Project_Happiness_data.csv"))
+```
+##                        TASK 1:
+
+Table summarising the Mean, Median, and Standard Deviation for each characteristic in each Region in 2019
+```{r summary_table, echo=FALSE,message=FALSE, warning=FALSE}
+hp_data[,-1]%>%group_by(Region,Year=2019)%>%summarise_all(list(Avg=~mean(.,na.rm=TRUE),Med=~median(.,na.rm = TRUE),Sd=~sd(.,na.rm = TRUE)))%>%pivot_longer(!c("Region","Year"),names_to = "characteristic")%>%pivot_wider(id_cols = c("characteristic","value","Year"),names_from=Region)%>%arrange(desc(characteristic))%>%kbl()%>%kable_styling()
+
+```
+
+
+```{r Task1_a, echo=FALSE,message=FALSE, warning=FALSE}
+
+##table with averages to be used for plotting the data
+
+hp_reg_mean=hp_data[,-1]%>%group_by(Region,Year=2019)%>%summarise_all(~mean(.,na.rm=TRUE))
+
+
+
+GDP_bar=ggplot(hp_reg_mean,aes(x=reorder(Region,-GDPperCap),y=GDPperCap,fill=Region))+geom_bar(stat="identity",width = 0.5)+  scale_x_discrete(guide = guide_axis(n.dodge=3)) + xlab("Region")
+
+Trust_bar=ggplot(hp_reg_mean,aes(x=reorder(Region,-TrustGov),y=TrustGov,fill=Region))+geom_bar(stat="identity",width = 0.5)+  scale_x_discrete(guide = guide_axis(n.dodge=3))+ xlab("Region")
+
+Family_bar=ggplot(hp_reg_mean,aes(x=reorder(Region,-Family),y=Family,fill=Region))+geom_bar(stat="identity",width = 0.5)+  scale_x_discrete(guide = guide_axis(n.dodge=3))+ xlab("Region")
+
+Freedom_bar=ggplot(hp_reg_mean,aes(x=reorder(Region,-Freedom),y=Freedom,fill=Region))+geom_bar(stat="identity",width = 0.5)+  scale_x_discrete(guide = guide_axis(n.dodge=3))+ xlab("Region")
+
+Health_bar=ggplot(hp_reg_mean,aes(x=reorder(Region,-HealthLifeExp),y=HealthLifeExp,fill=Region))+geom_bar(stat="identity",width = 0.5)+  scale_x_discrete(guide = guide_axis(n.dodge=3))+ xlab("Region")
+
+Gen_bar=ggplot(hp_reg_mean,aes(x=reorder(Region,-Generosity),y=Generosity,fill=Region))+geom_bar(stat="identity",width = 0.5)+  scale_x_discrete(guide = guide_axis(n.dodge=3))+ xlab("Region")
+
+GDP_box=ggplot(hp_data,aes(x=reorder(Region,-GDPperCap),y=GDPperCap,fill=Region))+geom_boxplot()+stat_boxplot(geom="errorbar",width=0.25)+  scale_x_discrete(guide = guide_axis(n.dodge=3))+ xlab("Region")
+
+Trust_box=ggplot(hp_data,aes(x=reorder(Region,-TrustGov),y=TrustGov,fill=Region))+geom_boxplot()+stat_boxplot(geom="errorbar",width=0.25)+  scale_x_discrete(guide = guide_axis(n.dodge=3))+ xlab("Region")
+
+Freedom_box=ggplot(hp_data,aes(x=reorder(Region,-Freedom),y=Freedom,fill=Region))+geom_boxplot()+stat_boxplot(geom="errorbar",width=0.25)+  scale_x_discrete(guide = guide_axis(n.dodge=3))+ xlab("Region")
+
+Family_box=ggplot(hp_data,aes(x=reorder(Region,-Family),y=Family,fill=Region))+geom_boxplot()+stat_boxplot(geom="errorbar",width=0.25)+  scale_x_discrete(guide = guide_axis(n.dodge=3))+ xlab("Region")
+
+Health_box=ggplot(hp_data,aes(x=reorder(Region,-HealthLifeExp),y=HealthLifeExp,fill=Region))+geom_boxplot()+stat_boxplot(geom="errorbar",width=0.25)+  scale_x_discrete(guide = guide_axis(n.dodge=3))+ xlab("Region")
+
+Gen_box=ggplot(hp_data,aes(x=reorder(Region,-Generosity),y=Generosity,fill=Region))+geom_boxplot()+stat_boxplot(geom="errorbar",width=0.25)+  scale_x_discrete(guide = guide_axis(n.dodge=3))+ xlab("Region")
+
+grid.arrange(GDP_bar,GDP_box,top="GDPperCap vs Region")
+cat("\n\n")
+grid.arrange(Trust_bar,Trust_box,top="TrustGov vs Region")
+cat("\n\n")
+grid.arrange(Freedom_bar,Freedom_box,top="Freedom vs Region")
+cat("\n\n")
+grid.arrange(Family_bar,Family_box,top="Family vs Region")
+cat("\n\n")
+grid.arrange(Health_bar,Health_box,top= "HealthLifeExp vs Region")
+cat("\n\n")
+grid.arrange(Gen_bar,Gen_box, top="Generosity vs Region")
+
+
+
+```
+
+a)
+
+If we take a look at the summary table provided, it is clear that the values for each characteristic differ in each region in terms of average, median and standard deviation, this seems to suggest that there is an association between the scores and the region.
+
+The trust in government is very high in Western Europe(highest average of 0.226) but the spread is very high if we look at the boxplot (25% below 0.1 and 25% above 0.3 and reaching 0.5). The averages are the lowest in Africa and Central Europe with almost 75% of countries at or below 0.1, while it is medium in other regions, so it seems that this characteristic is strongly associated to the region.
+
+The Health Life Excpectancy average is similar in all regions, except for it being high in Western Europe and very low in Africa. Conversely, the standard deviation is low in the former and high in the latter, and also very high in Asia. The median values are similar to the average values in all the regions. A medium strength association is observed between the region and life expectancy, this suggests that medical care and health is not too different in all regions, except for Africa having very poor life expectancy and all countries in Western Europe guaranteeing long lives to its citizens.
+
+In terms of Generosity, it is Asia that leads the way with the highest value, followed by Western Europe and the rest can be seen in the bar plot. Similarly, there is a clear association between the region and generosity levels, given the different cultures and traditions in the regions of the world, this association is not surprising.
+
+Again, we can see an association with the GDPperCap and the region, with Western Europe having the highest score and Africa the lowest. It can be noted too that the deviation is high in the ME/NA and Asian regions if we look at the Sd numbers and the length of the boxplots, while there is very little spread in Western EUrope with most countries having high GDPperCap.
+
+The freedom score is mildly associated with the region, there is a long tail in the boxplots for the top 3 countries, and similarly there is a large spread of values in all the regions which implies that the countries of the same region have different levels of freedom.
+
+The family score seems to have the weakest association with similar values in all regions, except for Africa having the lowest average again. Only the spread seems to differ in the regions (by the boxplot), with median values quite similar
+
+b)
+
+The scores seem to follow a similar trend in all region, with Western Europe topping the score in all categories except for Family, with most countries in Western Europe having high scores as well.
+Africa, Central Europe and ME/NA have the lowest scores and lots of deviation from the median score, showing inequalities between different countries in the same region. Americas and Asia are in the upper middle.
+
+
+##                        TASK 2:
+
+A table showing the happiness score for each country in every year
+
+```{r Task2_a, echo=FALSE,message=FALSE, warning=FALSE}
+## a
+nrows=nrow(hp_data)
+Happiness=vector(mode="numeric",length=nrows)
+for(i in 1:nrows){
+Happiness[i]=sum(hp_data[i,c("GDPperCap","TrustGov","Family","HealthLifeExp","Generosity","Freedom")])
+}
+hp_happy=na.omit(hp_data%>%mutate(Happiness=Happiness))
+hp_happy%>%subset(,c("Country","Year","Happiness"))
+
+
+```
+
+
+
+Table and line plot showing the max and min happiness for each region in each year
+
+
+```{r Task2_b, echo=FALSE,message=FALSE, warning=FALSE}
+## b
+
+happy_summ=hp_happy%>%group_by(Region,Year)%>%summarise(max_happiness=max(Happiness,na.rm = TRUE),min_happiness=min(Happiness,na.rm = TRUE))%>%arrange(Year)
+happy_summ%>%kbl(caption = "Max and Min Happiness in Each Region")%>%kable_styling()
+
+## need to store max and min happiness under same variable in order to plot them in the same graph
+
+happy_summ=happy_summ%>%pivot_longer(c("max_happiness","min_happiness"),names_to="type")
+
+ggplot(happy_summ,aes(x=Year,y=value,color=type))+geom_line()+geom_point(width=0.5)+facet_wrap(~Region)+ylab("Happiness score")+ scale_color_manual(values=c("red","blue"))
+
+```
+
+There is little change in the min and max happiness scores over time. We can see that the scores have very similar trends in all regions. First, there is a decrease in the max and min happiness from 2015 to 2016, then an increase from 2016 to 2017, forming a "V" shape in each graph, and later on, a slight decrease or slight increase depending on the region.
+We can also notice that while the values for the max and min happiness are changing over time, by 2019, the values became very close to the original values in 2015. However, in Africa we see a positive change, contrary to the dip in happiness in the ME/NA region.
+The trend of the lines appears to be similar across the entire world, as if the variation in happiness levels is something that affects the whole world and not just isolated regions.
+
+##                        Task 3
+
+
+```{r Task3, echo=FALSE,message=FALSE, warning=FALSE}
+##a
+hp_happy%>%group_by(Country)%>%summarize(Avg_happiness=mean(Happiness))%>%arrange(desc(Avg_happiness))%>%slice(1:10)%>%kbl(caption = "Top 10 Countries With Highest Happiness Score ")%>%kable_styling(full_width = FALSE)
+
+
+##b
+
+##function that creates happiness change for any table with columns Country, Year and Happiness
+happiness_change=function(table,nyears){
+tbl=tibble(Country=character(),Happiness_change=double())
+table=table%>%select(c("Country","Year","Happiness"))
+countries=unique(table$Country)
+c_len=length(countries)
+for(i in 1:c_len){
+  country=countries[i]
+  tmp=table%>%subset((Country==country))
+  hp_change=(tmp[nyears,3]-tmp[1,3])[[1]]
+  tbl=tbl%>%add_row(Country=country,Happiness_change=hp_change)
+
+}
+tbl
+}
+happiness_change(table=hp_happy,nyears = 5)%>%arrange(desc(Happiness_change))%>%slice(1:10)%>%kbl(caption = "Top 10 Countries With Highest Positive Happiness Score Change Between 2015 and 2019 ")%>%kable_styling(full_width = FALSE)
+
+```
+
+```{r, eval=FALSE}
+# The code I used in the project
+
+##TASK 1:
+
+## Summary table showing the average, median and standard deviation for each characteristic in each region in 2019
+
+hp_data[,-1]%>%group_by(Region,Year=2019)%>%summarise_all(list(Avg=~mean(.,na.rm=TRUE),Med=~median(.,na.rm = TRUE),Sd=~sd(.,na.rm = TRUE)))%>%
+  pivot_longer(!c("Region","Year"),names_to = "characteristic")%>%pivot_wider(id_cols = c("characteristic","value","Year"),names_from=Region)%>%arrange(desc(characteristic))%>%kbl()%>%kable_styling()
+
+
+##table with averages to be used for plotting the data
+
+hp_reg_mean=hp_data[,-1]%>%group_by(Region,Year=2019)%>%summarise_all(~mean(.,na.rm=TRUE))
+
+
+
+GDP_bar=ggplot(hp_reg_mean,aes(x=reorder(Region,-GDPperCap),y=GDPperCap,fill=Region))+geom_bar(stat="identity",width = 0.5)+  scale_x_discrete(guide = guide_axis(n.dodge=3)) + xlab("Region")
+
+Trust_bar=ggplot(hp_reg_mean,aes(x=reorder(Region,-TrustGov),y=TrustGov,fill=Region))+geom_bar(stat="identity",width = 0.5)+  scale_x_discrete(guide = guide_axis(n.dodge=3))+ xlab("Region")
+
+Family_bar=ggplot(hp_reg_mean,aes(x=reorder(Region,-Family),y=Family,fill=Region))+geom_bar(stat="identity",width = 0.5)+  scale_x_discrete(guide = guide_axis(n.dodge=3))+ xlab("Region")
+
+Freedom_bar=ggplot(hp_reg_mean,aes(x=reorder(Region,-Freedom),y=Freedom,fill=Region))+geom_bar(stat="identity",width = 0.5)+  scale_x_discrete(guide = guide_axis(n.dodge=3))+ xlab("Region")
+
+Health_bar=ggplot(hp_reg_mean,aes(x=reorder(Region,-HealthLifeExp),y=HealthLifeExp,fill=Region))+geom_bar(stat="identity",width = 0.5)+  scale_x_discrete(guide = guide_axis(n.dodge=3))+ xlab("Region")
+
+Gen_bar=ggplot(hp_reg_mean,aes(x=reorder(Region,-Generosity),y=Generosity,fill=Region))+geom_bar(stat="identity",width = 0.5)+  scale_x_discrete(guide = guide_axis(n.dodge=3))+ xlab("Region")
+
+GDP_box=ggplot(hp_data,aes(x=reorder(Region,-GDPperCap),y=GDPperCap,fill=Region))+geom_boxplot()+stat_boxplot(geom="errorbar",width=0.25)+  scale_x_discrete(guide = guide_axis(n.dodge=3))+ xlab("Region")
+
+Trust_box=ggplot(hp_data,aes(x=reorder(Region,-TrustGov),y=TrustGov,fill=Region))+geom_boxplot()+stat_boxplot(geom="errorbar",width=0.25)+  scale_x_discrete(guide = guide_axis(n.dodge=3))+ xlab("Region")
+
+Freedom_box=ggplot(hp_data,aes(x=reorder(Region,-Freedom),y=Freedom,fill=Region))+geom_boxplot()+stat_boxplot(geom="errorbar",width=0.25)+  scale_x_discrete(guide = guide_axis(n.dodge=3))+ xlab("Region")
+
+Family_box=ggplot(hp_data,aes(x=reorder(Region,-Family),y=Family,fill=Region))+geom_boxplot()+stat_boxplot(geom="errorbar",width=0.25)+  scale_x_discrete(guide = guide_axis(n.dodge=3))+ xlab("Region")
+
+Health_box=ggplot(hp_data,aes(x=reorder(Region,-HealthLifeExp),y=HealthLifeExp,fill=Region))+geom_boxplot()+stat_boxplot(geom="errorbar",width=0.25)+  scale_x_discrete(guide = guide_axis(n.dodge=3))+ xlab("Region")
+
+Gen_box=ggplot(hp_data,aes(x=reorder(Region,-Generosity),y=Generosity,fill=Region))+geom_boxplot()+stat_boxplot(geom="errorbar",width=0.25)+  scale_x_discrete(guide = guide_axis(n.dodge=3))+ xlab("Region")
+
+grid.arrange(GDP_bar,GDP_box,top="GDP vs Region")
+cat("\n\n")
+grid.arrange(Trust_bar,Trust_box,top="TrustGov vs Region")
+cat("\n\n")
+grid.arrange(Freedom_bar,Freedom_box,top="Freedom vs Region")
+cat("\n\n")
+grid.arrange(Family_bar,Family_box,top="Family vs Region")
+cat("\n\n")
+grid.arrange(Health_bar,Health_box,top= "HealthLifeExp vs Region")
+cat("\n\n")
+grid.arrange(Gen_bar,Gen_box, top="Generosity vs Region")
+
+
+##----------------------------------------------------------------------------------------------------------------
+
+## TASK 2:
+
+## a
+nrows=nrow(hp_data)
+Happiness=vector(mode="numeric",length=nrows)
+for(i in 1:nrows){
+Happiness[i]=sum(hp_data[i,c("GDPperCap","TrustGov","Family","HealthLifeExp","Generosity","Freedom")])
+}
+hp_happy=hp_data%>%mutate(Happiness=Happiness)
+hp_happy[is.na(hp_happy)]=0
+hp_happy%>%subset(,c("Country","Year","Happiness"))
+
+## b
+
+happy_summ=hp_happy%>%group_by(Region,Year)%>%summarise(max_happiness=max(Happiness,na.rm = TRUE),min_happiness=min(Happiness,na.rm = TRUE))%>%arrange(Year)
+happy_summ%>%kbl()%>%kable_styling()
+
+## need to store max and min happiness under same variable in order to plot them in the same graph
+
+happy_summ=happy_summ%>%pivot_longer(c("max_happiness","min_happiness"),names_to="type")
+
+ggplot(happy_summ,aes(x=Year,y=value,color=type))+geom_line()+geom_point(width=0.5)+facet_wrap(~Region)+ylab("Happiness score")+ scale_color_manual(values=c("red","blue"))
+
+##------------------------------------------------------------------------------------------------------------
+
+##TASK 3:
+
+##a
+hp_happy%>%group_by(Country)%>%summarize(Avg_happiness=mean(Happiness))%>%arrange(desc(Avg_happiness))%>%slice(1:10)%>%kbl(caption = "Top 10 Countries With Highest Happiness Score ")%>%kable_styling(full_width = FALSE)
+
+##b
+
+##function that creates happiness change for any table with columns Country, Year and Happiness
+happiness_change=function(table,nyears){
+tbl=tibble(Country=character(),Happiness_change=double())
+table=table%>%select(c("Country","Year","Happiness"))
+countries=unique(table$Country)
+c_len=length(countries)
+for(i in 1:c_len){
+  country=countries[i]
+  tmp=table%>%subset((Country==country))
+  hp_change=(tmp[nyears,3]-tmp[1,3])[[1]]
+  tbl=tbl%>%add_row(Country=country,Happiness_change=hp_change)
+
+}
+tbl
+}
+happiness_change(table=hp_happy,nyears = 5)%>%arrange(desc(Happiness_change))%>%slice(1:10)%>%kbl(caption = "Top 10 Countries With Highest Positive Happiness Score Change Between 2015 and 2019 ")%>%kable_styling(full_width = FALSE)
+
+```
+
